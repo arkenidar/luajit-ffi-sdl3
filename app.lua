@@ -6,37 +6,32 @@ sdl.init(sdl.INIT_VIDEO)
 
 local window = sdl.createWindow("Hello Lena", 512, 512, 0)
 sdl.setWindowResizable(window, true)
--- sdl.setWindowFullscreen(window, sdl.WINDOW_FULLSCREEN_DESKTOP)
--- sdl.setWindowFullscreen(window, sdl.WINDOW_FULLSCREEN)
--- sdl.setWindowOpacity(window, 0.5)
 
----local windowsurface = sdl.getWindowSurface(window)
+local imageSurface1 = sdl.LoadBMP("assets/lena.bmp")
+local imageSurface2 = sdl.LoadBMP("assets/alpha-blend.bmp")
 
-local imageSurface1 = sdl.LoadBMP("assets/lena.bmp")        -- sdl.destroySurface(imageSurface1)
-local imageSurface2 = sdl.LoadBMP("assets/alpha-blend.bmp") -- sdl.destroySurface(imageSurface2)
--- sdl.setSurfaceBlendMode(imageSurface1, sdl.BLENDMODE_BLEND)
--- sdl.setSurfaceBlendMode(imageSurface1, sdl.BLENDMODE_NONE)
-
-local function rect_from_xywh(xywh)
-   ---if xywh == nil then return nil end
-   local rect = ffi.new('SDL_Rect')
-   rect.x = xywh[1]
-   rect.y = xywh[2]
-   rect.w = xywh[3] -- or 1
-   rect.h = xywh[4] -- or 1
-   return rect
+local function rectangle_from_xywh(xywh)
+   local rectangle = ffi.new('SDL_Rect')
+   rectangle.x = xywh[1]
+   rectangle.y = xywh[2]
+   rectangle.w = xywh[3]
+   rectangle.h = xywh[4]
+   return rectangle
 end
 
 local function drawImage(imageSurface, xywh)
-   sdl.BlitSurfaceScaled(imageSurface, nil, windowsurface, rect_from_xywh(xywh), sdl.SCALEMODE_NEAREST)
+   sdl.BlitSurfaceScaled(imageSurface, nil, windowsurface, rectangle_from_xywh(xywh), sdl.SCALEMODE_NEAREST)
 end
 
 -- Helper: fill a rectangle with alpha blending using a temp surface
-local function fillRectAlphaBlend(targetSurface, xywh, r, g, b, a)
+local function fillRectAlphaBlend(xywh, r, g, b, a, targetSurface)
+   if targetSurface == nil then
+      targetSurface = windowsurface
+   end
    if xywh == nil then
       xywh = { 0, 0, targetSurface.w, targetSurface.h }
    end
-   local rect = rect_from_xywh(xywh)
+   local rect = rectangle_from_xywh(xywh)
    -- Create a temp RGBA surface
    local temp = sdl.createSurface(rect.w, rect.h, sdl.PIXELFORMAT_RGBA32)
    if temp == nil then return end
@@ -87,10 +82,6 @@ while running do
 
    -- surfaces
 
-   -- sdl.BlitSurface(imageSurface1, nil, windowsurface, rect_from_xywh({40, 40, 50, 50}))
-
-   -- sdl.BlitSurfaceScaled(imageSurface1, nil, windowsurface, rect_from_xywh({40, 40, 50, 50}), sdl.SCALEMODE_NEAREST)
-
    drawImage(imageSurface1, { 40, 40, 50, 50 })
    drawImage(imageSurface1, { 140, 40, 150, 150 })
 
@@ -99,7 +90,7 @@ while running do
 
    -- rectangles
 
-   fillRectAlphaBlend(windowsurface, { 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
+   fillRectAlphaBlend({ 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
 
    -- end
 
