@@ -1,5 +1,23 @@
 ---@diagnostic disable: undefined-global
 
+-- This example shows how to use SDL3 with LuaJIT and FFI
+-- It uses SDL3 to create a window and draw images and rectangles
+-- It uses SDL3 renderer or surface blitting depending on the UseRenderer variable
+
+function Render()
+   -- Draw images
+   DrawImage(Image['Lena'], { 0, 0, 512, 512 }) -- Full window as sizing
+
+   DrawImage(Image['Lena'], { 40, 40, 50, 50 })
+   DrawImage(Image['Lena'], { 140, 40, 150, 150 })
+
+   DrawImage(Image['transparent BMP'], { 40 + 10, 40 + 115, 50, 50 })
+   DrawImage(Image['transparent BMP'], { 140 + 10, 40 + 115, 150, 150 })
+
+   -- Fill rectangles
+   FillRect({ 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
+end
+
 local SDL = require 'sdl3_ffi'
 local ffi = require 'ffi'
 
@@ -25,8 +43,8 @@ if UseRenderer then
 end
 
 local Surface = {}
-Surface[1] = SDL_LoadBMP("assets/lena.bmp")
-Surface[2] = SDL_LoadBMP("assets/alpha-blend.bmp")
+Surface['Lena'] = SDL_LoadBMP("assets/lena.bmp")
+Surface['transparent BMP'] = SDL_LoadBMP("assets/alpha-blend.bmp")
 
 local Texture = {}
 if UseRenderer then
@@ -35,7 +53,7 @@ if UseRenderer then
    end
 end
 
-local Image = UseRenderer and Texture or Surface
+Image = UseRenderer and Texture or Surface
 
 function RectangleFromXYWH(xywh)
    local rectangle = ffi.new(UseRenderer and 'SDL_FRect' or 'SDL_Rect')
@@ -106,18 +124,7 @@ while running do
 
    -- After clear
 
-   -- Draw images
-   DrawImage(Image[1], { 0, 0, 512, 512 }) -- Full window as sizing
-
-   DrawImage(Image[1], { 40, 40, 50, 50 })
-   DrawImage(Image[1], { 140, 40, 150, 150 })
-
-   DrawImage(Image[2], { 40 + 10, 40 + 115, 50, 50 })
-   DrawImage(Image[2], { 140 + 10, 40 + 115, 150, 150 })
-
-
-   -- Fill rectangles
-   FillRect({ 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
+   Render()
 
    -- End of framebuffer drawing
 
