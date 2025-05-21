@@ -1,26 +1,26 @@
-local sdl = require 'sdl3_ffi' -- cp /c/msys64/mingw64/bin/SDL3.dll .
+local SDL = require 'sdl3_ffi' -- cp /c/msys64/mingw64/bin/SDL3.dll .
 local ffi = require 'ffi'
 
-sdl.init(sdl.INIT_VIDEO)
+SDL.init(SDL.INIT_VIDEO)
 
-UseRenderer = false -- Set to false to use SDL3 surface blitting instead of renderer
+UseRenderer = true -- Set to false to use SDL3 surface blitting instead of renderer
 
-Window = sdl.createWindow("Hello Lena", 512, 512, 0)
-sdl.setWindowResizable(Window, true)
+Window = SDL.createWindow("Hello Lena", 512, 512, 0)
+SDL.setWindowResizable(Window, true)
 
 if UseRenderer then
-   Renderer = sdl.createRenderer(Window, "software")
-   sdl.setRenderDrawBlendMode(Renderer, sdl.BLENDMODE_BLEND)
+   Renderer = SDL.createRenderer(Window, "software")
+   SDL.setRenderDrawBlendMode(Renderer, SDL.BLENDMODE_BLEND)
 end
 
 local Surface = {}
-Surface[1] = sdl.LoadBMP("assets/lena.bmp")
-Surface[2] = sdl.LoadBMP("assets/alpha-blend.bmp")
+Surface[1] = SDL.LoadBMP("assets/lena.bmp")
+Surface[2] = SDL.LoadBMP("assets/alpha-blend.bmp")
 
 local Texture = {}
 if UseRenderer then
    for key, value in pairs(Surface) do
-      Texture[key] = sdl.createTextureFromSurface(Renderer, value)
+      Texture[key] = SDL.createTextureFromSurface(Renderer, value)
    end
 end
 
@@ -37,31 +37,31 @@ end
 
 local function drawImage(imageDrawable, xywh)
    if UseRenderer then
-      sdl.renderTexture(Renderer, imageDrawable, nil, RectangleFromXYWH(xywh))
+      SDL.renderTexture(Renderer, imageDrawable, nil, RectangleFromXYWH(xywh))
    else
-      sdl.BlitSurfaceScaled(imageDrawable, nil, WindowSurface, RectangleFromXYWH(xywh), sdl.SCALEMODE_NEAREST)
+      SDL.BlitSurfaceScaled(imageDrawable, nil, WindowSurface, RectangleFromXYWH(xywh), SDL.SCALEMODE_NEAREST)
    end
 end
 
 
 local function fillRect(xywh, r, g, b, a)
    if UseRenderer then
-      sdl.setRenderDrawColor(Renderer, r, g, b, a)
-      sdl.renderFillRect(Renderer, RectangleFromXYWH(xywh))
+      SDL.setRenderDrawColor(Renderer, r, g, b, a)
+      SDL.renderFillRect(Renderer, RectangleFromXYWH(xywh))
    else
       -- Helper: fill a rectangle with alpha blending using a temp surface
       local rectangle = RectangleFromXYWH(xywh)
 
       -- Create a temp RGBA surface
-      local temp = sdl.createSurface(rectangle.w, rectangle.h, sdl.PIXELFORMAT_RGBA32)
+      local temp = SDL.createSurface(rectangle.w, rectangle.h, SDL.PIXELFORMAT_RGBA32)
       if temp == nil then return end
-      sdl.setSurfaceBlendMode(temp, sdl.BLENDMODE_BLEND)
-      local color = sdl.mapSurfaceRGBA(temp, r, g, b, a)
-      sdl.fillSurfaceRect(temp, nil, color)
+      SDL.setSurfaceBlendMode(temp, SDL.BLENDMODE_BLEND)
+      local color = SDL.mapSurfaceRGBA(temp, r, g, b, a)
+      SDL.fillSurfaceRect(temp, nil, color)
 
       -- Blit with blending onto target
-      sdl.BlitSurface(temp, nil, WindowSurface, rectangle)
-      sdl.destroySurface(temp)
+      SDL.BlitSurface(temp, nil, WindowSurface, rectangle)
+      SDL.destroySurface(temp)
    end
 end
 
@@ -69,12 +69,12 @@ local running = true
 local event = ffi.new('SDL_Event')
 while running do
    -- Input events
-   while sdl.pollEvent(event) do
-      if event.type == sdl.EVENT_QUIT then
+   while SDL.pollEvent(event) do
+      if event.type == SDL.EVENT_QUIT then
          running = false -- Quit from eg window closing
       end
-      if event.type == sdl.EVENT_KEY_DOWN then
-         if event.key.scancode == sdl.SCANCODE_ESCAPE or event.key.scancode == sdl.SCANCODE_Q then
+      if event.type == SDL.EVENT_KEY_DOWN then
+         if event.key.scancode == SDL.SCANCODE_ESCAPE or event.key.scancode == SDL.SCANCODE_Q then
             running = false -- Quit from keypress ESCAPE or Q
          end
       end
@@ -84,14 +84,14 @@ while running do
 
    if UseRenderer then
       -- Clear renderer
-      sdl.setRenderDrawColor(Renderer, 128, 128, 128, 255)
-      sdl.renderClear(Renderer)
+      SDL.setRenderDrawColor(Renderer, 128, 128, 128, 255)
+      SDL.renderClear(Renderer)
    else
       -- Init window surface
-      WindowSurface = sdl.getWindowSurface(Window)
+      WindowSurface = SDL.getWindowSurface(Window)
       -- Clear window surface
-      local color = sdl.mapSurfaceRGBA(WindowSurface, 128, 128, 128, 255)
-      sdl.fillSurfaceRect(WindowSurface, nil, color)
+      local color = SDL.mapSurfaceRGBA(WindowSurface, 128, 128, 128, 255)
+      SDL.fillSurfaceRect(WindowSurface, nil, color)
    end
 
    -- After clear
@@ -113,9 +113,9 @@ while running do
 
    -- Present the renderer or update the window surface
    if UseRenderer then
-      sdl.renderPresent(Renderer)
+      SDL.renderPresent(Renderer)
    else
-      sdl.updateWindowSurface(Window)
+      SDL.updateWindowSurface(Window)
    end
 end
 
@@ -125,23 +125,23 @@ end
 
 for _, surface in pairs(Surface) do
    -- Destroy Surfaces
-   sdl.destroySurface(surface)
+   SDL.destroySurface(surface)
 end
 
 if UseRenderer then
    -- Destroy renderer Textures
    for _, texture in pairs(Texture) do
-      sdl.destroyTexture(texture)
+      SDL.destroyTexture(texture)
    end
 end
 
 if UseRenderer then
    -- Destroy Renderer
-   sdl.destroyRenderer(Renderer)
+   SDL.destroyRenderer(Renderer)
 end
 
 -- Destroy Window
-sdl.destroyWindow(Window)
+SDL.destroyWindow(Window)
 
 -- Quit SDL3
-sdl.quit()
+SDL.quit()
