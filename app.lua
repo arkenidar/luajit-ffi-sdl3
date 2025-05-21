@@ -1,3 +1,10 @@
+-- This file is part of luajit-ffi-sdl3 and is licensed under the MIT License.
+-- See the LICENSE file in the project root for full license information.
+--[[
+# MIT License
+
+Copyright (c) 2025 Dario Cangialosi ( a.k.a. <https://Arkenidar.com/coder.php> and <https://github.com/arkenidar>)
+--]]
 ---@diagnostic disable: undefined-global
 
 -- This example shows how to use SDL3 with LuaJIT and FFI
