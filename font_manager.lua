@@ -12,14 +12,14 @@ M.FontTexture = nil -- Will hold SDL_Texture for font if UseRenderer is true
 
 local EnableDebugPrints = config.EnableDebugPrints
 local FontPath = config.FontPath
-local FONT_CHARACTER_MAP_STRING = config.FONT_CHARACTER_MAP_STRING
+local FontCharacterMapString = config.FontCharacterMapString -- Renamed from FONT_CHARACTER_MAP_STRING
 
 -- Helper to access SDL functions via _G or a passed SDL table
 local function _SDL(func_name)
     return _G["SDL_" .. func_name]
 end
 
-function M.loadAndProcessCustomFont(SDL, renderer_or_nil)
+function M.LoadAndProcessCustomFont(SDL, renderer_or_nil)
     if M.FontTexture then
         _SDL("DestroyTexture")(M.FontTexture); M.FontTexture = nil;
     end
@@ -94,7 +94,8 @@ function M.loadAndProcessCustomFont(SDL, renderer_or_nil)
     if EnableDebugPrints then print("Font surface locked successfully.") end
 
     print("Processing font: " ..
-    FontPath .. " (w:" .. M.FontSurface.w .. ", h:" .. M.FontSurface.h .. ", bpp:" .. (actual_bytes_per_pixel * 8) .. ")")
+        FontPath ..
+        " (w:" .. M.FontSurface.w .. ", h:" .. M.FontSurface.h .. ", bpp:" .. (actual_bytes_per_pixel * 8) .. ")")
     M.FontHeight = M.FontSurface.h
     M.FontGlyphs = {}
     local in_glyph_span = false
@@ -119,14 +120,21 @@ function M.loadAndProcessCustomFont(SDL, renderer_or_nil)
             local glyph_w = x - current_glyph_start_x
             if glyph_w > 0 then
                 glyph_index_in_map = glyph_index_in_map + 1
-                if glyph_index_in_map <= #FONT_CHARACTER_MAP_STRING then
-                    local char_for_glyph = string.sub(FONT_CHARACTER_MAP_STRING, glyph_index_in_map, glyph_index_in_map)
-                    M.FontGlyphs[char_for_glyph] = { src_x = current_glyph_start_x, src_y = 0, src_w = glyph_w, src_h = M
-                    .FontHeight }
-                    if EnableDebugPrints then print(string.format("Font: Glyph '%s' (idx %d): x=%d, w=%d, h=%d",
-                            char_for_glyph, glyph_index_in_map, current_glyph_start_x, glyph_w, M.FontHeight)) end
+                if glyph_index_in_map <= #FontCharacterMapString then                                                 -- Renamed
+                    local char_for_glyph = string.sub(FontCharacterMapString, glyph_index_in_map, glyph_index_in_map) -- Renamed
+                    M.FontGlyphs[char_for_glyph] = {
+                        src_x = current_glyph_start_x,
+                        src_y = 0,
+                        src_w = glyph_w,
+                        src_h = M
+                            .FontHeight
+                    }
+                    if EnableDebugPrints then
+                        print(string.format("Font: Glyph '%s' (idx %d): x=%d, w=%d, h=%d",
+                            char_for_glyph, glyph_index_in_map, current_glyph_start_x, glyph_w, M.FontHeight))
+                    end
                 else
-                    print("Font Warning: More glyphs in image than in FONT_CHARACTER_MAP_STRING."); break
+                    print("Font Warning: More glyphs in image than in FontCharacterMapString."); break -- Renamed
                 end
             elseif EnableDebugPrints then
                 print(string.format("Font Warning: Zero-width glyph at x=%d", x))
@@ -138,15 +146,22 @@ function M.loadAndProcessCustomFont(SDL, renderer_or_nil)
         local glyph_w = M.FontSurface.w - current_glyph_start_x
         if glyph_w > 0 then
             glyph_index_in_map = glyph_index_in_map + 1
-            if glyph_index_in_map <= #FONT_CHARACTER_MAP_STRING then
-                local char_for_glyph = string.sub(FONT_CHARACTER_MAP_STRING, glyph_index_in_map, glyph_index_in_map)
-                M.FontGlyphs[char_for_glyph] = { src_x = current_glyph_start_x, src_y = 0, src_w = glyph_w, src_h = M
-                .FontHeight }
-                if EnableDebugPrints then print(string.format(
-                    "Font: Glyph '%s' (idx %d) (end of image): x=%d, w=%d, h=%d", char_for_glyph, glyph_index_in_map,
-                        current_glyph_start_x, glyph_w, M.FontHeight)) end
+            if glyph_index_in_map <= #FontCharacterMapString then                                                 -- Renamed
+                local char_for_glyph = string.sub(FontCharacterMapString, glyph_index_in_map, glyph_index_in_map) -- Renamed
+                M.FontGlyphs[char_for_glyph] = {
+                    src_x = current_glyph_start_x,
+                    src_y = 0,
+                    src_w = glyph_w,
+                    src_h = M
+                        .FontHeight
+                }
+                if EnableDebugPrints then
+                    print(string.format(
+                        "Font: Glyph '%s' (idx %d) (end of image): x=%d, w=%d, h=%d", char_for_glyph, glyph_index_in_map,
+                        current_glyph_start_x, glyph_w, M.FontHeight))
+                end
             else
-                print("Font Warning: Final glyph in image but no more characters in FONT_CHARACTER_MAP_STRING.")
+                print("Font Warning: Final glyph in image but no more characters in FontCharacterMapString.") -- Renamed
             end
         end
     end
@@ -191,7 +206,7 @@ function M.loadAndProcessCustomFont(SDL, renderer_or_nil)
     return true
 end
 
-function M.getTextWidth(text)
+function M.GetTextWidth(text)
     local total_width = 0
     if not M.FontGlyphs or not text then return 0 end
     for i = 1, #text do
@@ -207,7 +222,11 @@ function M.getTextWidth(text)
     return total_width
 end
 
-function M.drawText(renderer_or_window_surface, text, x, y, color_tbl)
+function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
+    if EnableDebugPrints then                                                                                                                                                          -- DEBUG
+        print(string.format("font_manager.DrawText: Received renderer_or_window_surface type: %s, value: %s",
+            type(renderer_or_window_surface), tostring(renderer_or_window_surface)))                                                                                                   -- DEBUG
+    end                                                                                                                                                                                -- DEBUG
     local active_font_resource = config.UseRenderer and M.FontTexture or M.FontSurface
     if not active_font_resource or not M.FontGlyphs or not text or not next(M.FontGlyphs) then
         if EnableDebugPrints then print("DrawText: Font resources not available or text is nil.") end
@@ -261,7 +280,7 @@ function M.drawText(renderer_or_window_surface, text, x, y, color_tbl)
     end
 end
 
-function M.cleanup()
+function M.Cleanup()
     if M.FontTexture then
         _SDL("DestroyTexture")(M.FontTexture); M.FontTexture = nil;
     end

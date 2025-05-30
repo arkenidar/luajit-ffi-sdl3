@@ -7,9 +7,9 @@ local config = {
 
     -- Font Parameters
     FontPath = "assets/font.bmp", -- Path to the font bitmap
-    FontStartASCII = 32,          -- ASCII value of the first character in the font image
+    FontStartAscii = 32,          -- ASCII value of the first character in the font image
     -- 84 characters :
-    FONT_CHARACTER_MAP_STRING =
+    FontCharacterMapString =
     [=[ abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?-+/():;%&`'*#=[]"]=],
 
     -- Window Parameters
