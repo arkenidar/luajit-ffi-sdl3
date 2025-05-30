@@ -23,48 +23,20 @@ local EnableDebugPrintsDetails = config.EnableDebugPrintsDetails -- Use detailed
 -- It uses SDL3 to create a window and draw images and rectangles
 -- It uses SDL3 renderer or surface blitting depending on the UseRenderer variable
 
-local GlobalCounter = 0                                   -- Initialize GlobalCounter (Renamed from counter)
+local GlobalCounter = 0 -- Initialize GlobalCounter (Renamed from counter)
 
-function RenderScene()                                    -- Renamed from Render
-   if EnableDebugPrintsDetails and EnableDebugPrints then -- DEBUG
-      print(string.format("RenderScene [ENTRY]: AppRenderer is %s, AppWindowSurface is %s", tostring(AppRenderer),
-         tostring(AppWindowSurface)))                     -- DEBUG
-   end                                                    -- DEBUG
-   -- Draw Lena image
-   if ActiveImages and ActiveImages['Lena'] then          -- Renamed Image
-      local w_lena, h_lena
-      if UseRenderer then
-         local w_ptr, h_ptr = ffi.new("float[1]"), ffi.new("float[1]")      -- Changed to float
-         if SDL_GetTextureSize(ActiveImages['Lena'], w_ptr, h_ptr) then     -- Use SDL_GetTextureSize
-            w_lena, h_lena = w_ptr[0], h_ptr[0]
-            ActiveImages['Lena'].w, ActiveImages['Lena'].h = w_lena, h_lena -- Renamed Image
-         else
-            if EnableDebugPrintsDetails and EnableDebugPrints then
-               print(
-                  "Warning: SDL_GetTextureSize failed in RenderScene for ActiveImages['Lena']: " ..
-                  ffi.string(SDL_GetError()))
-            end
-            -- Keep existing w/h or set to 0,0 if not previously set
-            w_lena = ActiveImages['Lena'].w or 0
-            h_lena = ActiveImages['Lena'].h or 0
-         end
-      else -- Surface mode, dimensions should already be on the surface structure
-         w_lena = ActiveImages['Lena'].w
-         h_lena = ActiveImages['Lena'].h
-      end
+function RenderScene()  -- Renamed from Render
+   -- Draw images
+   graphics_utils.DrawImage(ActiveImages['Lena'], { 0, 0, ActiveImages['Lena'].w, ActiveImages['Lena'].h }) -- Renamed Image
 
-      -- Draw images
-      graphics_utils.DrawImage(ActiveImages['Lena'], { 0, 0, ActiveImages['Lena'].w, ActiveImages['Lena'].h }) -- Renamed Image
+   graphics_utils.DrawImage(ActiveImages['Lena'], { 40, 40, 50, 50 })                                       -- Renamed Image
+   graphics_utils.DrawImage(ActiveImages['Lena'], { 140, 40, 150, 150 })                                    -- Renamed Image
 
-      graphics_utils.DrawImage(ActiveImages['Lena'], { 40, 40, 50, 50 })                                       -- Renamed Image
-      graphics_utils.DrawImage(ActiveImages['Lena'], { 140, 40, 150, 150 })                                    -- Renamed Image
+   graphics_utils.DrawImage(ActiveImages['transparent BMP'], { 40 + 10, 40 + 115, 50, 50 })                 -- Renamed Image
+   graphics_utils.DrawImage(ActiveImages['transparent BMP'], { 140 + 10, 40 + 115, 150, 150 })              -- Renamed Image
 
-      graphics_utils.DrawImage(ActiveImages['transparent BMP'], { 40 + 10, 40 + 115, 50, 50 })                 -- Renamed Image
-      graphics_utils.DrawImage(ActiveImages['transparent BMP'], { 140 + 10, 40 + 115, 150, 150 })              -- Renamed Image
-
-      -- Fill rectangles
-      graphics_utils.FillRect({ 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
-   end
+   -- Fill rectangles
+   graphics_utils.FillRect({ 40 + 10, 40 + 15, 50, 50 }, 50, 50, 50, 100)
 
    -- Draw all buttons
    if ApplicationButtons then                     -- Renamed Buttons
