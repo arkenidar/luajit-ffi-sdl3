@@ -12,10 +12,11 @@ M.FontSurface = nil -- Will hold SDL_Surface for font
 M.FontTexture = nil -- Will hold SDL_Texture for font if UseRenderer is true
 
 local EnableDebugPrints = config.EnableDebugPrints
+local EnableDebugPrintsDetails = config.EnableDebugPrintsDetails -- Renamed from ENABLE_DEBUG_PRINTS_DETAILS
 local FontPath = config.FontPath
-local FontCharacterMapString = config.FontCharacterMapString -- Renamed from FONT_CHARACTER_MAP_STRING
+local FontCharacterMapString = config.FontCharacterMapString     -- Renamed from FONT_CHARACTER_MAP_STRING
 
-function M.LoadAndProcessCustomFont(renderer_or_nil)         -- Removed SDL parameter
+function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL parameter
     if M.FontTexture then
         SDL.DestroyTexture(M.FontTexture); M.FontTexture = nil;
     end
@@ -125,7 +126,7 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)         -- Removed SDL para
                         src_h = M
                             .FontHeight
                     }
-                    if false and EnableDebugPrints then
+                    if EnableDebugPrintsDetails and EnableDebugPrints then
                         print(string.format("Font: Glyph '%s' (idx %d): x=%d, w=%d, h=%d",
                             char_for_glyph, glyph_index_in_map, current_glyph_start_x, glyph_w, M.FontHeight))
                     end
@@ -151,7 +152,7 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)         -- Removed SDL para
                     src_h = M
                         .FontHeight
                 }
-                if false and EnableDebugPrints then
+                if EnableDebugPrintsDetails and EnableDebugPrints then
                     print(string.format(
                         "Font: Glyph '%s' (idx %d) (end of image): x=%d, w=%d, h=%d", char_for_glyph, glyph_index_in_map,
                         current_glyph_start_x, glyph_w, M.FontHeight))
@@ -219,13 +220,16 @@ function M.GetTextWidth(text)
 end
 
 function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
-    if false and EnableDebugPrints then                                              -- DEBUG
+    if EnableDebugPrintsDetails and EnableDebugPrints then                           -- DEBUG
         print(string.format("font_manager.DrawText: Received renderer_or_window_surface type: %s, value: %s",
             type(renderer_or_window_surface), tostring(renderer_or_window_surface))) -- DEBUG
     end                                                                              -- DEBUG
     local active_font_resource = config.UseRenderer and M.FontTexture or M.FontSurface
     if not active_font_resource or not M.FontGlyphs or not text or not next(M.FontGlyphs) then
-        if false and EnableDebugPrints then print("DrawText: Font resources not available or text is nil.") end
+        if EnableDebugPrintsDetails and EnableDebugPrints then
+            print(
+                "DrawText: Font resources not available or text is nil.")
+        end
         return
     end
 
@@ -271,7 +275,8 @@ function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
             end
             current_x = current_x + glyph.src_w + 1 -- Inter-character spacing
         else
-            if false and EnableDebugPrints then print("DrawText Warning: Char '" .. char .. "' not in FontGlyphs.") end
+            if EnableDebugPrintsDetails and EnableDebugPrints then print("DrawText Warning: Char '" ..
+                char .. "' not in FontGlyphs.") end
             current_x = current_x + (M.FontHeight or 0) / 2
         end
     end

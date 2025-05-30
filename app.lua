@@ -16,19 +16,19 @@ local graphics_utils = require 'graphics_utils'
 
 -- Update UseRenderer from config
 local UseRenderer = config.UseRenderer
-local EnableDebugPrints = config.EnableDebugPrints -- Use debug print setting from config
-
+local EnableDebugPrints = config.EnableDebugPrints               -- Use debug print setting from config
+local EnableDebugPrintsDetails = config.EnableDebugPrintsDetails -- Use detailed debug print setting from config
 -- This example shows how to use SDL3 with LuaJIT and FFI
 -- It uses SDL3 to create a window and draw images and rectangles
 -- It uses SDL3 renderer or surface blitting depending on the UseRenderer variable
 
-local GlobalCounter = 0                -- Initialize GlobalCounter (Renamed from counter)
+local GlobalCounter = 0                                   -- Initialize GlobalCounter (Renamed from counter)
 
-function RenderScene()                 -- Renamed from Render
-   if false and EnableDebugPrints then -- DEBUG
+function RenderScene()                                    -- Renamed from Render
+   if EnableDebugPrintsDetails and EnableDebugPrints then -- DEBUG
       print(string.format("RenderScene [ENTRY]: AppRenderer is %s, AppWindowSurface is %s", tostring(AppRenderer),
-         tostring(AppWindowSurface)))  -- DEBUG
-   end                                 -- DEBUG
+         tostring(AppWindowSurface)))                     -- DEBUG
+   end                                                    -- DEBUG
    -- -- Clear screen
    -- if UseRenderer then
    --    SDL.SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Renamed Renderer
@@ -49,7 +49,7 @@ function RenderScene()                 -- Renamed from Render
             w_lena, h_lena = w_ptr[0], h_ptr[0]
             ActiveImages['Lena'].w, ActiveImages['Lena'].h = w_lena, h_lena -- Renamed Image
          else
-            if false and EnableDebugPrints then
+            if EnableDebugPrintsDetails and EnableDebugPrints then
                print(
                   "Warning: SDL.GetTextureSize failed in RenderScene for ActiveImages['Lena']: " ..
                   ffi.string(SDL.GetError()))
@@ -86,11 +86,11 @@ function RenderScene()                 -- Renamed from Render
    -- Draw the counter
    local current_app_window_surface_value =
        AppWindowSurface                                                                                               -- Capture current value for debug
-   if false and EnableDebugPrints then
+   if EnableDebugPrintsDetails and EnableDebugPrints then
       print(string.format("RenderScene: Direct AppRenderer Ptr before target assignment: %s", tostring(AppRenderer))) -- DEBUG
    end
    local target_surface_or_renderer = UseRenderer and AppRenderer or current_app_window_surface_value
-   if false and EnableDebugPrints then
+   if EnableDebugPrintsDetails and EnableDebugPrints then
       print(string.format("RenderScene: AppWindowSurface (captured for this call) Ptr: %s",
          tostring(current_app_window_surface_value)))
       print(string.format("RenderScene: Attempting to draw counter. Target valid: %s, Counter value: %s, Target Ptr: %s",
@@ -99,9 +99,10 @@ function RenderScene()                 -- Renamed from Render
    if target_surface_or_renderer then
       font_manager.DrawText(target_surface_or_renderer, "Counter: " .. tostring(GlobalCounter), 10, 10, -- Renamed counter
          { r = 255, g = 255, b = 255, a = 255 })                                                        -- White text
-      if false and EnableDebugPrints then print("RenderScene: Call to font_manager.DrawText for counter completed.") end
+      if EnableDebugPrintsDetails and EnableDebugPrints then print(
+         "RenderScene: Call to font_manager.DrawText for counter completed.") end
    else
-      if false and EnableDebugPrints then print("RenderScene: Target for counter text is nil.") end
+      if EnableDebugPrintsDetails and EnableDebugPrints then print("RenderScene: Target for counter text is nil.") end
    end
 
    -- -- Present if using renderer
@@ -310,15 +311,16 @@ InitializeApplication()  -- Call InitializeApplication to initialize SDL, window
 
 -- Main event loop
 print("Starting main loop...")
-while IsRunning do                                                                                                        -- Renamed Running
-   while SDL.PollEvent(SdlEvent) do                                                                                       -- Renamed Event
-      if false and EnableDebugPrints then print(string.format("Event: type=0x%X (%d)", SdlEvent.type, SdlEvent.type)) end -- DEBUG EVENT TYPES
-      if SdlEvent.type == SDL.EVENT_QUIT then                                                                             -- Renamed Event
-         IsRunning = false                                                                                                -- Quit from eg window closing (Renamed Running)
+while IsRunning do                                                                                                                           -- Renamed Running
+   while SDL.PollEvent(SdlEvent) do                                                                                                          -- Renamed Event
+      if EnableDebugPrintsDetails and EnableDebugPrints then print(string.format("Event: type=0x%X (%d)", SdlEvent.type,
+            SdlEvent.type)) end                                                                                                              -- DEBUG EVENT TYPES
+      if SdlEvent.type == SDL.EVENT_QUIT then                                                                                                -- Renamed Event
+         IsRunning = false                                                                                                                   -- Quit from eg window closing (Renamed Running)
       end
-      if SdlEvent.type == SDL.EVENT_KEY_DOWN then                                                                         -- Renamed Event
-         if SdlEvent.key.scancode == SDL.SCANCODE_ESCAPE or SdlEvent.key.scancode == SDL.SCANCODE_Q then                  -- Renamed Event
-            IsRunning = false                                                                                             -- Quit from keypress ESCAPE or Q (Renamed Running)
+      if SdlEvent.type == SDL.EVENT_KEY_DOWN then                                                                                            -- Renamed Event
+         if SdlEvent.key.scancode == SDL.SCANCODE_ESCAPE or SdlEvent.key.scancode == SDL.SCANCODE_Q then                                     -- Renamed Event
+            IsRunning = false                                                                                                                -- Quit from keypress ESCAPE or Q (Renamed Running)
          end
       end
       if SdlEvent.type == SDL.EVENT_MOUSE_BUTTON_DOWN then                                                  -- Renamed Event

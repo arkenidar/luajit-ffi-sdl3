@@ -3,7 +3,8 @@ local config = {
     UseRenderer = true, -- Set to true for SDL Renderer, false for Surface blitting
 
     -- Debugging
-    EnableDebugPrints = true, -- Enable/disable verbose debug prints
+    EnableDebugPrints = true,         -- Enable/disable verbose debug prints
+    EnableDebugPrintsDetails = false, -- Enable/disable detailed debug prints
 
     -- Font Parameters
     FontPath = "assets/font.bmp", -- Path to the font bitmap

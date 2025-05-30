@@ -139,7 +139,7 @@ function M.DrawButton(button)
     local text_x = button.rect[1] + 5
     local text_y = button.rect[2] +
         (button.rect[4] - (font_manager.FontHeight or 16)) /
-        2                                                  -- Try to vertically center a bit if FontHeight known
+        2 -- Try to vertically center a bit if FontHeight known
 
     local target_drawable = config.UseRenderer and M.Renderer or M.WindowSurface
     if not target_drawable then
@@ -152,7 +152,7 @@ function M.DrawButton(button)
 
     if font_manager and font_manager.DrawText then                                      -- Renamed to PascalCase
         font_manager.DrawText(target_drawable, button.text, text_x, text_y, text_color) -- Renamed to PascalCase
-    elseif false and config.EnableDebugPrints then
+    elseif config.EnableDebugPrintsDetails and config.EnableDebugPrints then
         print("DrawButton Warning: font_manager.DrawText not available.")               -- Renamed to PascalCase
     end
 end
