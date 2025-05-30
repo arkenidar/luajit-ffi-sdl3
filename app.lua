@@ -30,19 +30,8 @@ function RenderScene()                                    -- Renamed from Render
       print(string.format("RenderScene [ENTRY]: AppRenderer is %s, AppWindowSurface is %s", tostring(AppRenderer),
          tostring(AppWindowSurface)))                     -- DEBUG
    end                                                    -- DEBUG
-   -- -- Clear screen
-   -- if UseRenderer then
-   --    SDL_SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Renamed Renderer
-   --    SDL_RenderClear(AppRenderer) -- Renamed Renderer
-   -- else
-   --    if AppWindowSurface then -- Ensure AppWindowSurface is valid (Renamed WindowSurface)
-   --       -- Fill the surface with black
-   --       SDL_FillSurfaceRect(AppWindowSurface, nil, SDL_MapRGB(AppWindowSurface.format, 0, 0, 0)) -- Renamed WindowSurface
-   --    end
-   -- end
-
    -- Draw Lena image
-   if ActiveImages and ActiveImages['Lena'] then -- Renamed Image
+   if ActiveImages and ActiveImages['Lena'] then          -- Renamed Image
       local w_lena, h_lena
       if UseRenderer then
          local w_ptr, h_ptr = ffi.new("float[1]"), ffi.new("float[1]")      -- Changed to float
@@ -107,17 +96,6 @@ function RenderScene()                                    -- Renamed from Render
    else
       if EnableDebugPrintsDetails and EnableDebugPrints then print("RenderScene: Target for counter text is nil.") end
    end
-
-   -- -- Present if using renderer
-   -- if UseRenderer then
-   --    SDL.RenderPresent(AppRenderer) -- Renamed Renderer
-   -- else
-   --    -- If not using renderer, blit the AppWindowSurface to the window (Renamed WindowSurface)
-   --    -- This might be handled by SDL.UpdateWindowSurface automatically if AppWindowSurface is the window's surface (Renamed WindowSurface)
-   --    -- or if you are blitting to a separate backbuffer that then gets presented.
-   --    -- For simplicity, assuming AppWindowSurface is directly related to the window or updated appropriately. (Renamed WindowSurface)
-   --    SDL.UpdateWindowSurface(AppWindow) -- Renamed Window
-   -- end
 end
 
 SDL_Init(SDL_INIT_VIDEO)
