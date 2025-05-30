@@ -25,16 +25,18 @@ function M.RectangleFromXYWH(xywh) -- Renamed
     return rectangle
 end
 
-function M.LoadBMPSurface(SDL_param, filePath, surfaceKey, targetSurfaceTable) -- Renamed SDL to SDL_param to avoid conflict
+-- Remove SDL_param from the function signature
+function M.LoadBMPSurface(filePath, surfaceKey, targetSurfaceTable)
     if not filePath or not surfaceKey then
         if config.EnableDebugPrints then print("LoadBMPSurface: Error - filePath or surfaceKey is nil.") end
         return false
     end
-    targetSurfaceTable[surfaceKey] = SDL_param.LoadBMP(filePath) -- Use passed SDL_param
+    -- Use the module-level SDL
+    targetSurfaceTable[surfaceKey] = SDL.LoadBMP(filePath)
     if targetSurfaceTable[surfaceKey] == nil then
         if config.EnableDebugPrints then
             print(string.format("LoadBMPSurface: Failed to load BMP '%s' for key '%s': %s", filePath, surfaceKey,
-                ffi.string(SDL_param.GetError())))
+                ffi.string(SDL.GetError()))) -- Use module-level SDL
         end
         return false
     elseif config.EnableDebugPrints then
