@@ -1,6 +1,6 @@
 -- graphics_utils.lua
 local ffi = require 'ffi'
-local SDL = require 'sdl3_ffi' -- Added SDL require
+local SDL = require 'sdl3_ffi'              -- Added SDL require
 local config = require 'config'
 local font_manager = require 'font_manager' -- Required for drawing text on buttons
 
@@ -138,18 +138,21 @@ function M.DrawButton(button)
     -- Adjust text position for simple padding. Proper centering would need text width/height.
     local text_x = button.rect[1] + 5
     local text_y = button.rect[2] +
-    (button.rect[4] - (font_manager.FontHeight or 16)) / 2                                 -- Try to vertically center a bit if FontHeight known
+        (button.rect[4] - (font_manager.FontHeight or 16)) /
+        2                                                  -- Try to vertically center a bit if FontHeight known
 
     local target_drawable = config.UseRenderer and M.Renderer or M.WindowSurface
     if not target_drawable then
-        if config.EnableDebugPrints then print(
-            "DrawButton Error: Target drawable (Renderer/Surface) not set in graphics_utils.") end
+        if config.EnableDebugPrints then
+            print(
+                "DrawButton Error: Target drawable (Renderer/Surface) not set in graphics_utils.")
+        end
         return
     end
 
     if font_manager and font_manager.DrawText then                                      -- Renamed to PascalCase
         font_manager.DrawText(target_drawable, button.text, text_x, text_y, text_color) -- Renamed to PascalCase
-    elseif config.EnableDebugPrints then
+    elseif false and config.EnableDebugPrints then
         print("DrawButton Warning: font_manager.DrawText not available.")               -- Renamed to PascalCase
     end
 end
