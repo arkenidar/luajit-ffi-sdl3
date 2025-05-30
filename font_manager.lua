@@ -255,8 +255,18 @@ function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
         local glyph = M.FontGlyphs[char]
         if glyph then
             if config.UseRenderer then
-                local src_frect = ffi.new('SDL_FRect', { glyph.src_x, glyph.src_y, glyph.src_w, glyph.src_h })
-                local dst_frect = ffi.new('SDL_FRect', { current_x, y, glyph.src_w, glyph.src_h })
+                local src_frect = ffi.new('SDL_FRect', {
+                    x = ffi.cast("float", glyph.src_x),
+                    y = ffi.cast("float", glyph.src_y),
+                    w = ffi.cast("float", glyph.src_w),
+                    h = ffi.cast("float", glyph.src_h)
+                })
+                local dst_frect = ffi.new('SDL_FRect', {
+                    x = ffi.cast("float", current_x),
+                    y = ffi.cast("float", y),
+                    w = ffi.cast("float", glyph.src_w),
+                    h = ffi.cast("float", glyph.src_h)
+                })
                 _SDL("RenderTexture")(renderer_or_window_surface, active_font_resource, src_frect, dst_frect)
             else
                 local src_rect = ffi.new('SDL_Rect', { glyph.src_x, glyph.src_y, glyph.src_w, glyph.src_h })
