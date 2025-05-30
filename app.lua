@@ -105,7 +105,7 @@ function RenderScene()                -- Renamed from Render
 
    -- Draw the counter
    local current_app_window_surface_value =
-   AppWindowSurface                                                                                                   -- Capture current value for debug
+       AppWindowSurface                                                                                               -- Capture current value for debug
    if EnableDebugPrints then
       print(string.format("RenderScene: Direct AppRenderer Ptr before target assignment: %s", tostring(AppRenderer))) -- DEBUG
    end
@@ -211,14 +211,14 @@ function InitializeApplication()                                                
             tostring(AppRenderer)))
       end
    else
-      AppWindowSurface = SDL_GetWindowSurface(AppWindow)                                                                  -- Renamed WindowSurface, Window
+      AppWindowSurface = SDL_GetWindowSurface(AppWindow) -- Renamed WindowSurface, Window
       if EnableDebugPrints then
          print(string.format(
             "InitializeApplication: SDL_GetWindowSurface called. AppWindowSurface Ptr: %s", tostring(AppWindowSurface)))
-      end                                                                                                                 -- DEBUG
-      if AppWindowSurface == nil then                                                                                     -- Renamed WindowSurface
+      end                             -- DEBUG
+      if AppWindowSurface == nil then -- Renamed WindowSurface
          print("Error getting window surface: " .. ffi.string(SDL_GetError()))
-         SDL_DestroyWindow(AppWindow)                                                                                     -- Renamed Window
+         SDL_DestroyWindow(AppWindow) -- Renamed Window
          SDL_Quit()
          os.exit(1)
       end
@@ -363,25 +363,25 @@ while IsRunning do                                                              
          if EnableDebugPrints then
             print("Window resized to: " ..
                SdlEvent.window.data1 ..
-               "x" .. SdlEvent.window.data2 .. string.format(" (Window Event ID: %d)", SdlEvent.window.event_id))
-         end                                                                                                       -- Log window event_id
+               "x" .. SdlEvent.window.data2 .. string.format(" (Window Event Type: %d)", tonumber(SdlEvent.window.type)))
+         end                                                    -- Log window event type
          if not UseRenderer then
-            local new_surface = SDL_GetWindowSurface(AppWindow)                                                    -- Renamed Window
+            local new_surface = SDL_GetWindowSurface(AppWindow) -- Renamed Window
             if EnableDebugPrints then
                print(string.format(
                   "Resize Handler: SDL_GetWindowSurface called. New Surface Ptr: %s", tostring(new_surface)))
-            end                                                                                                    -- DEBUG
+            end -- DEBUG
             if new_surface == nil then
                print("Error getting window surface after resize: " .. ffi.string(SDL_GetError()))
-               IsRunning = false                                         -- Critical error (Renamed Running)
+               IsRunning = false -- Critical error (Renamed Running)
             else
                AppWindowSurface =
-               new_surface                                               -- Renamed WindowSurface
+                   new_surface                                           -- Renamed WindowSurface
                graphics_utils.InitRendererSurface(nil, AppWindowSurface) -- Re-initialize graphics_utils
                if EnableDebugPrints then
                   print(string.format("Resize Handler: AppWindowSurface updated. New Ptr: %s",
                      tostring(AppWindowSurface)))
-               end                                                       -- Renamed WindowSurface
+               end -- Renamed WindowSurface
             end
          end
       end
