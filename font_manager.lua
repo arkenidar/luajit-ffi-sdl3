@@ -2,6 +2,7 @@
 local ffi = require 'ffi'
 local config = require 'config' -- Assuming config.lua is in the same directory
 local SDL = require 'sdl3_ffi'  -- Added
+require('global')(SDL)          -- Initialize global SDL functions/constants
 
 local M = {}
 
@@ -18,26 +19,26 @@ local FontCharacterMapString = config.FontCharacterMapString     -- Renamed from
 
 function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL parameter
     if M.FontTexture then
-        SDL.DestroyTexture(M.FontTexture); M.FontTexture = nil;
+        SDL_DestroyTexture(M.FontTexture); M.FontTexture = nil;
     end
     if M.FontSurface then
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil;
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil;
     end
 
-    M.FontSurface = SDL.LoadBMP(FontPath)
+    M.FontSurface = SDL_LoadBMP(FontPath)
     if M.FontSurface == nil then
-        print("Error loading font BMP: " .. ffi.string(SDL.GetError()))
+        print("Error loading font BMP: " .. ffi.string(SDL_GetError()))
         return false
     end
 
-    local pixel_format_details = SDL.GetPixelFormatDetails(M.FontSurface.format)
+    local pixel_format_details = SDL_GetPixelFormatDetails(M.FontSurface.format)
     if pixel_format_details == nil then
         print("Error: SDL_GetPixelFormatDetails returned NULL for format: " .. M.FontSurface.format)
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
         return false
     end
 
-    local format_name_ptr = SDL.GetPixelFormatName(M.FontSurface.format)
+    local format_name_ptr = SDL_GetPixelFormatName(M.FontSurface.format)
     local format_name_str = "Unknown"
     if format_name_ptr ~= nil then format_name_str = ffi.string(format_name_ptr) end
 
@@ -56,13 +57,13 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL 
 
     if format_name_str ~= "SDL_PIXELFORMAT_ARGB8888" then
         print(string.format("Font Error: Must be SDL_PIXELFORMAT_ARGB8888. Detected: %s", format_name_str))
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
         return false
     end
 
     if actual_bits_per_pixel ~= 32 then
         print(string.format("Font Error: Must be 32 BitsPerPixel. Detected: %d", actual_bits_per_pixel))
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
         return false
     end
 
@@ -76,15 +77,15 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL 
         print(string.format("Pitch: %d", M.FontSurface.pitch))
     end
 
-    if not SDL.SetSurfaceBlendMode(M.FontSurface, SDL.BLENDMODE_BLEND) then
-        print("Font Error: setting blend mode: " .. ffi.string(SDL.GetError()))
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+    if not SDL_SetSurfaceBlendMode(M.FontSurface, SDL_BLENDMODE_BLEND) then
+        print("Font Error: setting blend mode: " .. ffi.string(SDL_GetError()))
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
         return false
     end
 
-    if not SDL.LockSurface(M.FontSurface) then
-        print("Font Error: locking surface: " .. ffi.string(SDL.GetError()))
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+    if not SDL_LockSurface(M.FontSurface) then
+        print("Font Error: locking surface: " .. ffi.string(SDL_GetError()))
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
         return false
     end
 
@@ -105,7 +106,7 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL 
 
     for x = 0, M.FontSurface.w - 1 do
         local current_pixel_value = cast_pixels_ptr[x]
-        SDL.GetRGBA(current_pixel_value, pixel_format_details, ffi.NULL, r_val, g_val, b_val, a_val)
+        SDL_GetRGBA(current_pixel_value, pixel_format_details, ffi.NULL, r_val, g_val, b_val, a_val)
         local r, g, b, a = r_val[0], g_val[0], b_val[0], a_val[0]
         local is_separator = (r == 255 and g == 255 and b == 0 and a == 255)
 
@@ -163,18 +164,18 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL 
         end
     end
 
-    SDL.UnlockSurface(M.FontSurface)
+    SDL_UnlockSurface(M.FontSurface)
 
     if config.UseRenderer then
         if renderer_or_nil == nil then
             print("Font Error: Renderer is nil, cannot create font texture.")
-            SDL.DestroySurface(M.FontSurface); M.FontSurface = nil
+            SDL_DestroySurface(M.FontSurface); M.FontSurface = nil
             return false
         end
-        M.FontTexture = SDL.CreateTextureFromSurface(renderer_or_nil, M.FontSurface)
+        M.FontTexture = SDL_CreateTextureFromSurface(renderer_or_nil, M.FontSurface)
         if M.FontTexture == nil then
-            print("Font Error: creating texture: " .. ffi.string(SDL.GetError()))
-            SDL.DestroySurface(M.FontSurface); M.FontSurface = nil -- Critical for renderer mode
+            print("Font Error: creating texture: " .. ffi.string(SDL_GetError()))
+            SDL_DestroySurface(M.FontSurface); M.FontSurface = nil -- Critical for renderer mode
             return false
         elseif EnableDebugPrints then
             print("Font: Successfully created FontTexture from FontSurface.")
@@ -185,10 +186,10 @@ function M.LoadAndProcessCustomFont(renderer_or_nil)             -- Removed SDL 
     if glyphs_count == 0 then
         print("Font Warning: No glyphs processed. Text will not render.")
         if M.FontTexture then
-            SDL.DestroyTexture(M.FontTexture); M.FontTexture = nil;
+            SDL_DestroyTexture(M.FontTexture); M.FontTexture = nil;
         end
         if M.FontSurface then
-            SDL.DestroySurface(M.FontSurface); M.FontSurface = nil;
+            SDL_DestroySurface(M.FontSurface); M.FontSurface = nil;
         end
         return false
     elseif EnableDebugPrints then
@@ -242,11 +243,11 @@ function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
     end
 
     if config.UseRenderer then
-        SDL.SetTextureColorMod(active_font_resource, r_mod, g_mod, b_mod)
-        SDL.SetTextureAlphaMod(active_font_resource, a_mod)
+        SDL_SetTextureColorMod(active_font_resource, r_mod, g_mod, b_mod)
+        SDL_SetTextureAlphaMod(active_font_resource, a_mod)
     else
-        SDL.SetSurfaceColorMod(active_font_resource, r_mod, g_mod, b_mod)
-        SDL.SetSurfaceAlphaMod(active_font_resource, a_mod)
+        SDL_SetSurfaceColorMod(active_font_resource, r_mod, g_mod, b_mod)
+        SDL_SetSurfaceAlphaMod(active_font_resource, a_mod)
     end
 
     local current_x = x
@@ -267,36 +268,38 @@ function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
                     w = ffi.cast("float", glyph.src_w),
                     h = ffi.cast("float", glyph.src_h)
                 })
-                SDL.RenderTexture(renderer_or_window_surface, active_font_resource, src_frect, dst_frect)
+                SDL_RenderTexture(renderer_or_window_surface, active_font_resource, src_frect, dst_frect)
             else
                 local src_rect = ffi.new('SDL_Rect', { glyph.src_x, glyph.src_y, glyph.src_w, glyph.src_h })
                 local dst_rect = ffi.new('SDL_Rect', { x = current_x, y = y }) -- w/h ignored by BlitSurface
-                SDL.BlitSurface(active_font_resource, src_rect, renderer_or_window_surface, dst_rect)
+                SDL_BlitSurface(active_font_resource, src_rect, renderer_or_window_surface, dst_rect)
             end
             current_x = current_x + glyph.src_w + 1 -- Inter-character spacing
         else
-            if EnableDebugPrintsDetails and EnableDebugPrints then print("DrawText Warning: Char '" ..
-                char .. "' not in FontGlyphs.") end
+            if EnableDebugPrintsDetails and EnableDebugPrints then
+                print("DrawText Warning: Char '" ..
+                    char .. "' not in FontGlyphs.")
+            end
             current_x = current_x + (M.FontHeight or 0) / 2
         end
     end
 
     -- Reset modulation
     if config.UseRenderer then
-        SDL.SetTextureColorMod(active_font_resource, 255, 255, 255)
-        SDL.SetTextureAlphaMod(active_font_resource, 255)
+        SDL_SetTextureColorMod(active_font_resource, 255, 255, 255)
+        SDL_SetTextureAlphaMod(active_font_resource, 255)
     else
-        SDL.SetSurfaceColorMod(active_font_resource, 255, 255, 255)
-        SDL.SetSurfaceAlphaMod(active_font_resource, 255)
+        SDL_SetSurfaceColorMod(active_font_resource, 255, 255, 255)
+        SDL_SetSurfaceAlphaMod(active_font_resource, 255)
     end
 end
 
 function M.Cleanup()
     if M.FontTexture then
-        SDL.DestroyTexture(M.FontTexture); M.FontTexture = nil;
+        SDL_DestroyTexture(M.FontTexture); M.FontTexture = nil;
     end
     if M.FontSurface then
-        SDL.DestroySurface(M.FontSurface); M.FontSurface = nil;
+        SDL_DestroySurface(M.FontSurface); M.FontSurface = nil;
     end
     if EnableDebugPrints then print("Font manager cleaned up.") end
 end

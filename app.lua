@@ -9,44 +9,8 @@ Copyright (c) 2025 Dario Cangialosi ( a.k.a. <https://Arkenidar.com/coder.php> a
 
 -- Moved module requires and initial setup to the top for correct scoping
 local ffi = require 'ffi'
-local OriginalSDL = require 'sdl3_ffi' -- Store the original library under a new name
-
--- Setup _G metatable to handle SDL_FunctionName and SDL.CONSTANT_NAME syntax
-do
-   local old_G_mt = getmetatable(_G)
-   local old_G_index
-   if old_G_mt and old_G_mt.__index then
-      old_G_index = old_G_mt.__index
-   end
-
-   setmetatable(_G, {
-      __index = function(t, key) -- t is _G
-         if type(key) == "string" then
-            -- Handle SDL_FunctionName lookups
-            if string.sub(key, 1, 4) == "SDL_" then
-               local func_name = string.sub(key, 5)
-               if OriginalSDL[func_name] ~= nil then
-                  return OriginalSDL[func_name]
-               end
-            end
-            -- Handle SDL.CONSTANT_NAME lookups (by making "SDL" resolve to OriginalSDL)
-            if key == "SDL" then
-               return OriginalSDL
-            end
-         end
-
-         -- Chain to original __index if it existed
-         if old_G_index then
-            if type(old_G_index) == 'function' then
-               return old_G_index(t, key)
-            elseif type(old_G_index) == 'table' then
-               return old_G_index[key]
-            end
-         end
-         return nil -- Default behavior: global not found
-      end
-   })
-end
+local SDL = require 'sdl3_ffi' -- Store the original library under a new name
+require('global')(SDL)         -- Initialize global SDL functions/constants
 
 local config = require 'config'
 local font_manager = require 'font_manager'
@@ -366,7 +330,7 @@ while IsRunning do                  -- Renamed Running
          end
       end
       if SdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN then                                                  -- Renamed Event
-         if SdlEvent.button.button == SDL_BUTTON_LEFT then                                                  -- Explicitly use SDL.BUTTON_LEFT (Renamed Event)
+         if SdlEvent.button.button == SDL_BUTTON_LEFT then                                                  -- Explicitly use SDL_BUTTON_LEFT (Renamed Event)
             -- print(string.format("Mouse button down: LEFT at (%d, %d)", SdlEvent.button.x, SdlEvent.button.y)) (Renamed Event)
             for _, btn in ipairs(ApplicationButtons) do                                                     -- Renamed Buttons
                if SdlEvent.button.x >= btn.rect[1] and SdlEvent.button.x <= btn.rect[1] + btn.rect[3] and   -- Use btn.rect[1] for x, btn.rect[3] for w (Renamed Event)

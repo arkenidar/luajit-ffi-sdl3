@@ -3,6 +3,7 @@ local ffi = require 'ffi'
 local SDL = require 'sdl3_ffi'              -- Added SDL require
 local config = require 'config'
 local font_manager = require 'font_manager' -- Required for drawing text on buttons
+require('global')(SDL)                      -- Initialize global SDL functions/constants
 
 local M = {}
 
@@ -36,13 +37,13 @@ function M.DrawImage(imageDrawable, xywh) -- Renamed
             print("DrawImage Error: Renderer not initialized in graphics_utils.")
             return
         end
-        SDL.RenderTexture(M.Renderer, imageDrawable, nil, dest_rect)
+        SDL_RenderTexture(M.Renderer, imageDrawable, nil, dest_rect)
     else
         if not M.WindowSurface then
             print("DrawImage Error: WindowSurface not initialized in graphics_utils.")
             return
         end
-        SDL.BlitSurfaceScaled(imageDrawable, nil, M.WindowSurface, dest_rect, SDL.SCALEMODE_NEAREST)
+        SDL_BlitSurfaceScaled(imageDrawable, nil, M.WindowSurface, dest_rect, SDL_SCALEMODE_NEAREST)
     end
 end
 
@@ -53,27 +54,27 @@ function M.FillRect(xywh, r, g, b, a)           -- Renamed
             print("FillRect Error: Renderer not initialized in graphics_utils.")
             return
         end
-        SDL.SetRenderDrawColor(M.Renderer, r, g, b, a)
-        SDL.RenderFillRect(M.Renderer, rectangle)
+        SDL_SetRenderDrawColor(M.Renderer, r, g, b, a)
+        SDL_RenderFillRect(M.Renderer, rectangle)
     else
         if not M.WindowSurface then
             print("FillRect Error: WindowSurface not initialized in graphics_utils.")
             return
         end
         -- Create a temp RGBA surface for blending
-        local temp_surface = SDL.CreateSurface(rectangle.w, rectangle.h, SDL.PIXELFORMAT_RGBA32)
+        local temp_surface = SDL_CreateSurface(rectangle.w, rectangle.h, SDL_PIXELFORMAT_RGBA32)
         if temp_surface == nil then
             if config.EnableDebugPrints then
                 print("FillRect Error: Could not create temp surface: " ..
-                    ffi.string(SDL.GetError()))
+                    ffi.string(SDL_GetError()))
             end
             return
         end
-        SDL.SetSurfaceBlendMode(temp_surface, SDL.BLENDMODE_BLEND)
-        local color = SDL.MapSurfaceRGBA(temp_surface, r, g, b, a)
-        SDL.FillSurfaceRect(temp_surface, nil, color)
-        SDL.BlitSurface(temp_surface, nil, M.WindowSurface, rectangle)
-        SDL.DestroySurface(temp_surface)
+        SDL_SetSurfaceBlendMode(temp_surface, SDL_BLENDMODE_BLEND)
+        local color = SDL_MapSurfaceRGBA(temp_surface, r, g, b, a)
+        SDL_FillSurfaceRect(temp_surface, nil, color)
+        SDL_BlitSurface(temp_surface, nil, M.WindowSurface, rectangle)
+        SDL_DestroySurface(temp_surface)
     end
 end
 
