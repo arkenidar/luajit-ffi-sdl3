@@ -18,26 +18,6 @@ local graphics_utils = require 'graphics_utils'
 local UseRenderer = config.UseRenderer
 local EnableDebugPrints = config.EnableDebugPrints -- Use debug print setting from config
 
--- Metatable to allow calling SDL functions/constants globally
-_G = setmetatable(_G, {
-   __index = function(self, index)
-      if type(index) == "string" and "SDL_" == string.sub(index, 1, 4) then
-         local searched = string.sub(index, 5, #index)
-         if SDL[searched] ~= nil then
-            return SDL[searched]
-         else
-            -- Fallback for SDL_ prefixed keys not found in SDL table after stripping prefix
-            -- This could indicate an issue or a constant defined elsewhere.
-            -- For now, we'll try the original index in the SDL table as a last resort for SDL_ prefixed keys.
-            if SDL[index] ~= nil then
-               return SDL[index]
-            end
-         end
-      end
-      return rawget(self, index) -- Fallback for non-SDL globals or if SDL is not loaded
-   end
-})
-
 -- This example shows how to use SDL3 with LuaJIT and FFI
 -- It uses SDL3 to create a window and draw images and rectangles
 -- It uses SDL3 renderer or surface blitting depending on the UseRenderer variable
@@ -51,12 +31,12 @@ function RenderScene()                -- Renamed from Render
    end                                -- DEBUG
    -- -- Clear screen
    -- if UseRenderer then
-   --    SDL_SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Renamed Renderer
-   --    SDL_RenderClear(AppRenderer) -- Renamed Renderer
+   --    SDL.SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Renamed Renderer
+   --    SDL.RenderClear(AppRenderer) -- Renamed Renderer
    -- else
    --    if AppWindowSurface then -- Ensure AppWindowSurface is valid (Renamed WindowSurface)
    --       -- Fill the surface with black
-   --       SDL_FillSurfaceRect(AppWindowSurface, nil, SDL_MapRGB(AppWindowSurface.format, 0, 0, 0)) -- Renamed WindowSurface
+   --       SDL.FillSurfaceRect(AppWindowSurface, nil, SDL.MapRGB(AppWindowSurface.format, 0, 0, 0)) -- Renamed WindowSurface
    --    end
    -- end
 
@@ -65,14 +45,14 @@ function RenderScene()                -- Renamed from Render
       local w_lena, h_lena
       if UseRenderer then
          local w_ptr, h_ptr = ffi.new("float[1]"), ffi.new("float[1]")      -- Changed to float
-         if SDL_GetTextureSize(ActiveImages['Lena'], w_ptr, h_ptr) then     -- Use SDL_GetTextureSize
+         if SDL.GetTextureSize(ActiveImages['Lena'], w_ptr, h_ptr) then     -- Use SDL.GetTextureSize
             w_lena, h_lena = w_ptr[0], h_ptr[0]
             ActiveImages['Lena'].w, ActiveImages['Lena'].h = w_lena, h_lena -- Renamed Image
          else
             if EnableDebugPrints then
                print(
-                  "Warning: SDL_GetTextureSize failed in RenderScene for ActiveImages['Lena']: " ..
-                  ffi.string(SDL_GetError()))
+                  "Warning: SDL.GetTextureSize failed in RenderScene for ActiveImages['Lena']: " ..
+                  ffi.string(SDL.GetError()))
             end
             -- Keep existing w/h or set to 0,0 if not previously set
             w_lena = ActiveImages['Lena'].w or 0
@@ -126,17 +106,17 @@ function RenderScene()                -- Renamed from Render
 
    -- -- Present if using renderer
    -- if UseRenderer then
-   --    SDL_RenderPresent(AppRenderer) -- Renamed Renderer
+   --    SDL.RenderPresent(AppRenderer) -- Renamed Renderer
    -- else
    --    -- If not using renderer, blit the AppWindowSurface to the window (Renamed WindowSurface)
-   --    -- This might be handled by SDL_UpdateWindowSurface automatically if AppWindowSurface is the window\'s surface (Renamed WindowSurface)
+   --    -- This might be handled by SDL.UpdateWindowSurface automatically if AppWindowSurface is the window's surface (Renamed WindowSurface)
    --    -- or if you are blitting to a separate backbuffer that then gets presented.
    --    -- For simplicity, assuming AppWindowSurface is directly related to the window or updated appropriately. (Renamed WindowSurface)
-   --    SDL_UpdateWindowSurface(AppWindow) -- Renamed Window
+   --    SDL.UpdateWindowSurface(AppWindow) -- Renamed Window
    -- end
 end
 
-SDL_Init(SDL_INIT_VIDEO)
+SDL.Init(SDL.INIT_VIDEO)
 
 -- REMOVE Font parameters and Globals for font resources and metrics
 -- These are now managed by font_manager.lua and configured in config.lua
@@ -154,11 +134,11 @@ function LoadBitmapSurface(filePath, surfaceKey) -- Renamed from LoadBMPSurface
       end
       return false
    end
-   Surfaces[surfaceKey] = SDL_LoadBMP(filePath)                                                                   -- Renamed Surface
+   Surfaces[surfaceKey] = SDL.LoadBMP(filePath)                                                                   -- Renamed Surface
    if Surfaces[surfaceKey] == nil then                                                                            -- Renamed Surface
       if EnableDebugPrints then
          print(string.format("LoadBitmapSurface: Failed to load BMP '%s' for key '%s': %s", filePath, surfaceKey, -- Renamed
-            ffi.string(SDL_GetError())))
+            ffi.string(SDL.GetError())))
       end
       return false
    elseif EnableDebugPrints then
@@ -167,19 +147,19 @@ function LoadBitmapSurface(filePath, surfaceKey) -- Renamed from LoadBMPSurface
    return true
 end
 
--- REMOVE LoadAndProcessCustomFont function (it\'s now in font_manager.lua)
+-- REMOVE LoadAndProcessCustomFont function (it's now in font_manager.lua)
 
--- REMOVE DrawText function (it\'s now in font_manager.lua)
+-- REMOVE DrawText function (it\\\'s now in font_manager.lua)
 
--- REMOVE GetTextWidth function (it\'s now in font_manager.lua)
+-- REMOVE GetTextWidth function (it\\\'s now in font_manager.lua)
 
 -- Global/Top-level application variables
 -- local UseRenderer = false -- Now sourced from config.lua
 local AppWindow = nil                 -- Renamed Window
 AppRenderer = nil                     -- Renamed Renderer
 AppWindowSurface = nil                -- For surface blitting if UseRenderer is false (Renamed WindowSurface)
-Surfaces = {}                         -- Holds SDL_Surface objects, ensure it\'s global or accessible (Renamed Surface)
-Textures = {}                         -- Holds SDL_Texture objects if UseRenderer is true, ensure it\'s global (Renamed Texture)
+Surfaces = {}                         -- Holds SDL_Surface objects, ensure it's global or accessible (Renamed Surface)
+Textures = {}                         -- Holds SDL_Texture objects if UseRenderer is true, ensure it's global (Renamed Texture)
 ActiveImages = nil                    -- Points to either Surface or Texture table based on UseRenderer (Renamed Image)
 ApplicationButtons = {}               -- Table to hold button definitions (Renamed Buttons)
 local SdlEvent = ffi.new('SDL_Event') -- For event polling (Renamed Event)
@@ -187,22 +167,22 @@ local IsRunning = true                -- Controls the main loop (Renamed Running
 
 -- Main application setup
 function InitializeApplication()                                                                -- Renamed from Setup
-   AppWindow = SDL_CreateWindow(config.WindowTitle, config.WindowWidth, config.WindowHeight, 0) -- Renamed Window, used config
+   AppWindow = SDL.CreateWindow(config.WindowTitle, config.WindowWidth, config.WindowHeight, 0) -- Renamed Window, used config
    if AppWindow == nil then                                                                     -- Renamed Window
-      print("Error creating window: " .. ffi.string(SDL_GetError()))
+      print("Error creating window: " .. ffi.string(SDL.GetError()))
       os.exit(1)
    end
-   SDL_SetWindowResizable(AppWindow, true) -- Renamed Window
+   SDL.SetWindowResizable(AppWindow, true) -- Renamed Window
 
    if UseRenderer then
-      AppRenderer = SDL_CreateRenderer(AppWindow, nil) -- Renamed Renderer, Window
+      AppRenderer = SDL.CreateRenderer(AppWindow, nil) -- Renamed Renderer, Window
       if AppRenderer == nil then                       -- Renamed Renderer
-         print("Error creating renderer: " .. ffi.string(SDL_GetError()))
-         SDL_DestroyWindow(AppWindow)                  -- Renamed Window
-         SDL_Quit()
+         print("Error creating renderer: " .. ffi.string(SDL.GetError()))
+         SDL.DestroyWindow(AppWindow)                  -- Renamed Window
+         SDL.Quit()
          os.exit(1)
       end
-      SDL_SetRenderDrawBlendMode(AppRenderer, SDL.BLENDMODE_BLEND) -- Renamed Renderer
+      SDL.SetRenderDrawBlendMode(AppRenderer, SDL.BLENDMODE_BLEND) -- Renamed Renderer
       graphics_utils.InitRendererSurface(AppRenderer, nil)         -- Initialize graphics_utils (Renamed Renderer)
       ActiveImages =
           Textures                                                 -- Use Textures table for images (Renamed Image, Texture)
@@ -211,15 +191,15 @@ function InitializeApplication()                                                
             tostring(AppRenderer)))
       end
    else
-      AppWindowSurface = SDL_GetWindowSurface(AppWindow) -- Renamed WindowSurface, Window
+      AppWindowSurface = SDL.GetWindowSurface(AppWindow) -- Renamed WindowSurface, Window
       if EnableDebugPrints then
          print(string.format(
-            "InitializeApplication: SDL_GetWindowSurface called. AppWindowSurface Ptr: %s", tostring(AppWindowSurface)))
+            "InitializeApplication: SDL.GetWindowSurface called. AppWindowSurface Ptr: %s", tostring(AppWindowSurface)))
       end                             -- DEBUG
       if AppWindowSurface == nil then -- Renamed WindowSurface
-         print("Error getting window surface: " .. ffi.string(SDL_GetError()))
-         SDL_DestroyWindow(AppWindow) -- Renamed Window
-         SDL_Quit()
+         print("Error getting window surface: " .. ffi.string(SDL.GetError()))
+         SDL.DestroyWindow(AppWindow) -- Renamed Window
+         SDL.Quit()
          os.exit(1)
       end
       graphics_utils.InitRendererSurface(nil, AppWindowSurface) -- Initialize graphics_utils (Renamed WindowSurface)
@@ -230,11 +210,13 @@ function InitializeApplication()                                                
       end
    end
 
-   -- Load font using the font_manager
-   -- Pass SDL object and Renderer (if applicable)
-   if not font_manager.LoadAndProcessCustomFont(SDL, UseRenderer and AppRenderer or nil) then -- Renamed Renderer
-      print("Failed to load font using font_manager. Text rendering might not work.")
-      -- Decide if this is a fatal error
+   -- Load font
+   -- The call to LoadAndProcessCustomFont was passing SDL as the first argument,
+   -- but the function signature was changed to only accept renderer_or_nil.
+   if not font_manager.LoadAndProcessCustomFont(UseRenderer and AppRenderer or nil) then
+      print("Failed to load font, exiting.")
+      SDL.Quit()
+      os.exit(1)
    else
       if EnableDebugPrints then print("Font loaded successfully via font_manager.") end
    end
@@ -250,17 +232,17 @@ function InitializeApplication()                                                
    -- Create textures if using renderer
    if UseRenderer then
       if Surfaces["Lena"] then                                                                                          -- Renamed Surface
-         Textures["Lena"] = SDL_CreateTextureFromSurface(AppRenderer, Surfaces["Lena"])                                 -- Renamed Texture, Renderer, Surface
-         if Textures["Lena"] == nil then print("Failed to create texture for Lena: " .. ffi.string(SDL_GetError())) end -- Renamed Texture
-         -- SDL_DestroySurface(Surfaces["Lena"]); Surfaces["Lena"] = nil -- Original surface can be freed (Renamed Surface)
+         Textures["Lena"] = SDL.CreateTextureFromSurface(AppRenderer, Surfaces["Lena"])                                 -- Renamed Texture, Renderer, Surface
+         if Textures["Lena"] == nil then print("Failed to create texture for Lena: " .. ffi.string(SDL.GetError())) end -- Renamed Texture
+         -- SDL.DestroySurface(Surfaces["Lena"]); Surfaces["Lena"] = nil -- Original surface can be freed (Renamed Surface)
       end
       if Surfaces["transparent BMP"] then                                                                     -- Renamed Surface
-         Textures["transparent BMP"] = SDL_CreateTextureFromSurface(AppRenderer, Surfaces["transparent BMP"]) -- Renamed Texture, Renderer, Surface
+         Textures["transparent BMP"] = SDL.CreateTextureFromSurface(AppRenderer, Surfaces["transparent BMP"]) -- Renamed Texture, Renderer, Surface
          if Textures["transparent BMP"] == nil then                                                           -- Renamed Texture
             print("Failed to create texture for transparent BMP: " ..
-               ffi.string(SDL_GetError()))
+               ffi.string(SDL.GetError()))
          end
-         -- SDL_DestroySurface(Surfaces["transparent BMP"]); Surfaces["transparent BMP"] = nil (Renamed Surface)
+         -- SDL.DestroySurface(Surfaces["transparent BMP"]); Surfaces["transparent BMP"] = nil (Renamed Surface)
       end
    end
 
@@ -268,13 +250,13 @@ function InitializeApplication()                                                
    if ActiveImages and ActiveImages['Lena'] then                                -- Renamed Image
       if UseRenderer then
          local w_ptr, h_ptr = ffi.new("float[1]"), ffi.new("float[1]")          -- Changed to float
-         if SDL_GetTextureSize(ActiveImages['Lena'], w_ptr, h_ptr) then         -- Use SDL_GetTextureSize, returns true on success
+         if SDL.GetTextureSize(ActiveImages['Lena'], w_ptr, h_ptr) then         -- Use SDL.GetTextureSize, returns true on success
             ActiveImages['Lena'].w, ActiveImages['Lena'].h = w_ptr[0], h_ptr[0] -- Renamed Image
          else
             ActiveImages['Lena'].w, ActiveImages['Lena'].h = 0, 0               -- fallback (Renamed Image)
             if EnableDebugPrints then
-               print("Warning: SDL_GetTextureSize failed for ActiveImages['Lena'] in Init: " ..
-                  ffi.string(SDL_GetError()))
+               print("Warning: SDL.GetTextureSize failed for ActiveImages['Lena'] in Init: " ..
+                  ffi.string(SDL.GetError()))
             end
          end
       else                                              -- Surface
@@ -323,43 +305,43 @@ function InitializeApplication()                                                
    ApplicationButtons[2].offsetFromWindowRightEdge = config.WindowWidth - (button2X + button2W)
 end
 
-SDL_Init(SDL_INIT_VIDEO) -- Ensure SDL_Init is called before InitializeApplication
+SDL.Init(SDL.INIT_VIDEO) -- Ensure SDL.Init is called before InitializeApplication
 InitializeApplication()  -- Call InitializeApplication to initialize SDL, window, renderer, load assets etc. (Renamed Setup)
 
 -- Main event loop
 print("Starting main loop...")
 while IsRunning do                                                                                              -- Renamed Running
-   while SDL_PollEvent(SdlEvent) do                                                                             -- Renamed Event
+   while SDL.PollEvent(SdlEvent) do                                                                             -- Renamed Event
       if EnableDebugPrints then print(string.format("Event: type=0x%X (%d)", SdlEvent.type, SdlEvent.type)) end -- DEBUG EVENT TYPES
-      if SdlEvent.type == SDL_EVENT_QUIT then                                                                   -- Renamed Event
+      if SdlEvent.type == SDL.EVENT_QUIT then                                                                   -- Renamed Event
          IsRunning = false                                                                                      -- Quit from eg window closing (Renamed Running)
       end
-      if SdlEvent.type == SDL_EVENT_KEY_DOWN then                                                               -- Renamed Event
-         if SdlEvent.key.scancode == SDL_SCANCODE_ESCAPE or SdlEvent.key.scancode == SDL_SCANCODE_Q then        -- Renamed Event
+      if SdlEvent.type == SDL.EVENT_KEY_DOWN then                                                               -- Renamed Event
+         if SdlEvent.key.scancode == SDL.SCANCODE_ESCAPE or SdlEvent.key.scancode == SDL.SCANCODE_Q then        -- Renamed Event
             IsRunning = false                                                                                   -- Quit from keypress ESCAPE or Q (Renamed Running)
          end
       end
-      if SdlEvent.type == SDL_EVENT_MOUSE_BUTTON_DOWN then                                                  -- Renamed Event
-         if SdlEvent.button.button == SDL.SDL_BUTTON_LEFT then                                              -- Explicitly use SDL.SDL_BUTTON_LEFT (Renamed Event)
+      if SdlEvent.type == SDL.EVENT_MOUSE_BUTTON_DOWN then                                                  -- Renamed Event
+         if SdlEvent.button.button == SDL.BUTTON_LEFT then                                              -- Explicitly use SDL.BUTTON_LEFT (Renamed Event)
             -- print(string.format("Mouse button down: LEFT at (%d, %d)", SdlEvent.button.x, SdlEvent.button.y)) (Renamed Event)
             for _, btn in ipairs(ApplicationButtons) do                                                     -- Renamed Buttons
                if SdlEvent.button.x >= btn.rect[1] and SdlEvent.button.x <= btn.rect[1] + btn.rect[3] and   -- Use btn.rect[1] for x, btn.rect[3] for w (Renamed Event)
                    SdlEvent.button.y >= btn.rect[2] and SdlEvent.button.y <= btn.rect[2] + btn.rect[4] then -- Use btn.rect[2] for y, btn.rect[4] for h (Renamed Event)
                   btn.isPressed = true                                                                      -- Set pressed state
                   if btn.onClick then
-                     btn.onClick()                                                                          -- Execute the button\'s action
+                     btn.onClick()                                                                          -- Execute the button's action
                      if EnableDebugPrints then print("Button clicked: " .. btn.text) end
                   end
                end
             end
          end
-      elseif SdlEvent.type == SDL_EVENT_MOUSE_BUTTON_UP then   -- Handle mouse button release (Renamed Event)
-         if SdlEvent.button.button == SDL.SDL_BUTTON_LEFT then -- Renamed Event
+      elseif SdlEvent.type == SDL.EVENT_MOUSE_BUTTON_UP then   -- Handle mouse button release (Renamed Event)
+         if SdlEvent.button.button == SDL.BUTTON_LEFT then -- Renamed Event
             for _, btn in ipairs(ApplicationButtons) do        -- Renamed Buttons
                btn.isPressed = false                           -- Reset pressed state
             end
          end
-      elseif SdlEvent.type == SDL_EVENT_MOUSE_MOTION then                                                -- Renamed Event
+      elseif SdlEvent.type == SDL.EVENT_MOUSE_MOTION then                                                -- Renamed Event
          for _, btn in ipairs(ApplicationButtons) do                                                     -- Renamed Buttons
             if SdlEvent.motion.x >= btn.rect[1] and SdlEvent.motion.x <= btn.rect[1] + btn.rect[3] and   -- Use btn.rect[1] for x, btn.rect[3] for w (Renamed Event)
                 SdlEvent.motion.y >= btn.rect[2] and SdlEvent.motion.y <= btn.rect[2] + btn.rect[4] then -- Use btn.rect[2] for y, btn.rect[4] for h (Renamed Event)
@@ -368,7 +350,7 @@ while IsRunning do                                                              
                btn.isHovered = false
             end
          end
-      elseif SdlEvent.type == SDL_EVENT_WINDOW_RESIZED then -- Renamed Event
+      elseif SdlEvent.type == SDL.EVENT_WINDOW_RESIZED then -- Renamed Event
          local new_window_width = SdlEvent.window.data1
          local new_window_height = SdlEvent.window.data2 -- Though not used for current X anchoring
 
@@ -388,13 +370,13 @@ while IsRunning do                                                              
          end
 
          if not UseRenderer then
-            local new_surface = SDL_GetWindowSurface(AppWindow)                                                    -- Renamed Window
+            local new_surface = SDL.GetWindowSurface(AppWindow)                                                    -- Renamed Window
             if EnableDebugPrints then
                print(string.format(
-                  "Resize Handler: SDL_GetWindowSurface called. New Surface Ptr: %s", tostring(new_surface)))
+                  "Resize Handler: SDL.GetWindowSurface called. New Surface Ptr: %s", tostring(new_surface)))
             end -- DEBUG
             if new_surface == nil then
-               print("Error getting window surface after resize: " .. ffi.string(SDL_GetError()))
+               print("Error getting window surface after resize: " .. ffi.string(SDL.GetError()))
                IsRunning = false -- Critical error (Renamed Running)
             else
                AppWindowSurface =
@@ -411,23 +393,23 @@ while IsRunning do                                                              
 
    -- Rendering logic
    if UseRenderer then
-      SDL_SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Clear to black (Renamed Renderer)
-      SDL_RenderClear(AppRenderer)                      -- Renamed Renderer
+      SDL.SetRenderDrawColor(AppRenderer, 0, 0, 0, 255) -- Clear to black (Renamed Renderer)
+      SDL.RenderClear(AppRenderer)                      -- Renamed Renderer
       RenderScene()                                     -- Call the main render function (Renamed Render)
-      SDL_RenderPresent(AppRenderer)                    -- Renamed Renderer
+      SDL.RenderPresent(AppRenderer)                    -- Renamed Renderer
    else
       if EnableDebugPrints then
          print(string.format("MainLoop Pre-Render (Surface Mode): AppWindowSurface Ptr: %s, IsRunning: %s",
             tostring(AppWindowSurface), tostring(IsRunning))) -- DEBUG
       end
       if AppWindowSurface then                                -- Renamed WindowSurface
-         SDL_FillSurfaceRect(AppWindowSurface, nil, 0)        -- Clear to black (0 is black for default format) (Renamed WindowSurface)
+         SDL.FillSurfaceRect(AppWindowSurface, nil, 0)        -- Clear to black (0 is black for default format) (Renamed WindowSurface)
          RenderScene()                                        -- Call the main render function (Renamed Render)
-         SDL_UpdateWindowSurface(AppWindow)                   -- Renamed Window
+         SDL.UpdateWindowSurface(AppWindow)                   -- Renamed Window
       end
    end
 
-   SDL_Delay(16) -- Aim for ~60 FPS
+   SDL.Delay(16) -- Aim for ~60 FPS
 end
 print("Exiting main loop...")
 
@@ -444,7 +426,7 @@ function ShutdownApplication() -- Renamed from Quit
       for key, tex in pairs(Textures) do                 -- Renamed Texture
          if tex and tex ~= font_manager.FontTexture then -- Avoid double-free if font_manager also puts its texture here
             if EnableDebugPrints then print("Destroying texture: " .. key) end
-            SDL_DestroyTexture(tex)
+            SDL.DestroyTexture(tex)
             Textures[key] = nil -- Renamed Texture
          end
       end
@@ -459,7 +441,7 @@ function ShutdownApplication() -- Renamed from Quit
       for key, surf in pairs(Surfaces) do                  -- Renamed Surface
          if surf and surf ~= font_manager.FontSurface then -- Avoid double-free
             if EnableDebugPrints then print("Destroying surface: " .. key) end
-            SDL_DestroySurface(surf)
+            SDL.DestroySurface(surf) -- Added SDL. prefix
             Surfaces[key] = nil -- Renamed Surface
          end
       end
@@ -471,22 +453,22 @@ function ShutdownApplication() -- Renamed from Quit
 
    if AppRenderer then                                                       -- Renamed Renderer
       if EnableDebugPrints then print("Destroying renderer...") end
-      SDL_DestroyRenderer(AppRenderer)                                       -- Renamed Renderer
+      SDL.DestroyRenderer(AppRenderer)                                       -- Renamed Renderer
       AppRenderer = nil                                                      -- Renamed Renderer
       if EnableDebugPrints then print("Renderer destroyed.") end
    end
-   -- AppWindowSurface is typically not destroyed manually if obtained from SDL_GetWindowSurface, (Renamed WindowSurface)
+   -- AppWindowSurface is typically not destroyed manually if obtained from SDL.GetWindowSurface, (Renamed WindowSurface)
    -- as SDL manages it with the window.
 
    if AppWindow then               -- Renamed Window
       if EnableDebugPrints then print("Destroying window...") end
-      SDL_DestroyWindow(AppWindow) -- Renamed Window
+      SDL.DestroyWindow(AppWindow) -- Renamed Window
       AppWindow = nil              -- Renamed Window
       if EnableDebugPrints then print("Window destroyed.") end
    end
 
-   SDL_Quit()
-   if EnableDebugPrints then print("SDL_Quit() called. Exiting application.") end
+   SDL.Quit()
+   if EnableDebugPrints then print("SDL.Quit() called. Exiting application.") end
 end
 
 ShutdownApplication() -- Call ShutdownApplication to clean up resources and shut down SDL (Renamed Quit)

@@ -1,14 +1,10 @@
 -- graphics_utils.lua
 local ffi = require 'ffi'
+local SDL = require 'sdl3_ffi' -- Added SDL require
 local config = require 'config'
 local font_manager = require 'font_manager' -- Required for drawing text on buttons
 
 local M = {}
-
--- Helper to access SDL functions via _G or a passed SDL table
-local function _SDL(func_name)
-    return _G["SDL_" .. func_name]
-end
 
 -- Store Renderer and WindowSurface globally within this module after they are initialized
 M.Renderer = nil
@@ -29,16 +25,16 @@ function M.RectangleFromXYWH(xywh) -- Renamed
     return rectangle
 end
 
-function M.LoadBMPSurface(SDL, filePath, surfaceKey, targetSurfaceTable) -- Renamed
+function M.LoadBMPSurface(SDL_param, filePath, surfaceKey, targetSurfaceTable) -- Renamed SDL to SDL_param to avoid conflict
     if not filePath or not surfaceKey then
         if config.EnableDebugPrints then print("LoadBMPSurface: Error - filePath or surfaceKey is nil.") end
         return false
     end
-    targetSurfaceTable[surfaceKey] = SDL.LoadBMP(filePath)
+    targetSurfaceTable[surfaceKey] = SDL_param.LoadBMP(filePath) -- Use passed SDL_param
     if targetSurfaceTable[surfaceKey] == nil then
         if config.EnableDebugPrints then
             print(string.format("LoadBMPSurface: Failed to load BMP '%s' for key '%s': %s", filePath, surfaceKey,
-                ffi.string(SDL.GetError())))
+                ffi.string(SDL_param.GetError())))
         end
         return false
     elseif config.EnableDebugPrints then
@@ -58,13 +54,13 @@ function M.DrawImage(imageDrawable, xywh) -- Renamed
             print("DrawImage Error: Renderer not initialized in graphics_utils.")
             return
         end
-        _SDL("RenderTexture")(M.Renderer, imageDrawable, nil, dest_rect)
+        SDL.RenderTexture(M.Renderer, imageDrawable, nil, dest_rect)
     else
         if not M.WindowSurface then
             print("DrawImage Error: WindowSurface not initialized in graphics_utils.")
             return
         end
-        _SDL("BlitSurfaceScaled")(imageDrawable, nil, M.WindowSurface, dest_rect, _SDL("SCALEMODE_NEAREST"))
+        SDL.BlitSurfaceScaled(imageDrawable, nil, M.WindowSurface, dest_rect, SDL.SCALEMODE_NEAREST)
     end
 end
 
@@ -75,27 +71,27 @@ function M.FillRect(xywh, r, g, b, a)           -- Renamed
             print("FillRect Error: Renderer not initialized in graphics_utils.")
             return
         end
-        _SDL("SetRenderDrawColor")(M.Renderer, r, g, b, a)
-        _SDL("RenderFillRect")(M.Renderer, rectangle)
+        SDL.SetRenderDrawColor(M.Renderer, r, g, b, a)
+        SDL.RenderFillRect(M.Renderer, rectangle)
     else
         if not M.WindowSurface then
             print("FillRect Error: WindowSurface not initialized in graphics_utils.")
             return
         end
         -- Create a temp RGBA surface for blending
-        local temp_surface = _SDL("CreateSurface")(rectangle.w, rectangle.h, _SDL("PIXELFORMAT_RGBA32"))
+        local temp_surface = SDL.CreateSurface(rectangle.w, rectangle.h, SDL.PIXELFORMAT_RGBA32)
         if temp_surface == nil then
             if config.EnableDebugPrints then
                 print("FillRect Error: Could not create temp surface: " ..
-                    ffi.string(_SDL("GetError")()))
+                    ffi.string(SDL.GetError()))
             end
             return
         end
-        _SDL("SetSurfaceBlendMode")(temp_surface, _SDL("BLENDMODE_BLEND"))
-        local color = _SDL("MapSurfaceRGBA")(temp_surface, r, g, b, a)
-        _SDL("FillSurfaceRect")(temp_surface, nil, color)
-        _SDL("BlitSurface")(temp_surface, nil, M.WindowSurface, rectangle)
-        _SDL("DestroySurface")(temp_surface)
+        SDL.SetSurfaceBlendMode(temp_surface, SDL.BLENDMODE_BLEND)
+        local color = SDL.MapSurfaceRGBA(temp_surface, r, g, b, a)
+        SDL.FillSurfaceRect(temp_surface, nil, color)
+        SDL.BlitSurface(temp_surface, nil, M.WindowSurface, rectangle)
+        SDL.DestroySurface(temp_surface)
     end
 end
 
