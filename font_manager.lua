@@ -223,10 +223,10 @@ function M.GetTextWidth(text)
 end
 
 function M.DrawText(renderer_or_window_surface, text, x, y, color_tbl)
-    if EnableDebugPrints then                                                                                                                                                          -- DEBUG
+    if EnableDebugPrints then                                                        -- DEBUG
         print(string.format("font_manager.DrawText: Received renderer_or_window_surface type: %s, value: %s",
-            type(renderer_or_window_surface), tostring(renderer_or_window_surface)))                                                                                                   -- DEBUG
-    end                                                                                                                                                                                -- DEBUG
+            type(renderer_or_window_surface), tostring(renderer_or_window_surface))) -- DEBUG
+    end                                                                              -- DEBUG
     local active_font_resource = config.UseRenderer and M.FontTexture or M.FontSurface
     if not active_font_resource or not M.FontGlyphs or not text or not next(M.FontGlyphs) then
         if EnableDebugPrints then print("DrawText: Font resources not available or text is nil.") end

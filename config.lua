@@ -1,6 +1,6 @@
 local config = {
     -- Rendering Mode
-    UseRenderer = true, -- Set to true for SDL Renderer, false for Surface blitting
+    UseRenderer = false, -- Set to true for SDL Renderer, false for Surface blitting
 
     -- Debugging
     EnableDebugPrints = true, -- Enable/disable verbose debug prints
