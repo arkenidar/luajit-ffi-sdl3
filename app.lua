@@ -74,28 +74,8 @@ function RenderScene()                                    -- Renamed from Render
    end
 
    -- Draw the counter
-   local current_app_window_surface_value =
-       AppWindowSurface                                                                                               -- Capture current value for debug
-   if EnableDebugPrintsDetails and EnableDebugPrints then
-      print(string.format("RenderScene: Direct AppRenderer Ptr before target assignment: %s", tostring(AppRenderer))) -- DEBUG
-   end
-   local target_surface_or_renderer = UseRenderer and AppRenderer or current_app_window_surface_value
-   if EnableDebugPrintsDetails and EnableDebugPrints then
-      print(string.format("RenderScene: AppWindowSurface (captured for this call) Ptr: %s",
-         tostring(current_app_window_surface_value)))
-      print(string.format("RenderScene: Attempting to draw counter. Target valid: %s, Counter value: %s, Target Ptr: %s",
-         tostring(target_surface_or_renderer ~= nil), tostring(GlobalCounter), tostring(target_surface_or_renderer)))
-   end
-   if target_surface_or_renderer then
-      font_manager.DrawText(target_surface_or_renderer, "Counter: " .. tostring(GlobalCounter), 10, 10, -- Renamed counter
-         { r = 255, g = 255, b = 255, a = 255 })                                                        -- White text
-      if EnableDebugPrintsDetails and EnableDebugPrints then
-         print(
-            "RenderScene: Call to font_manager.DrawText for counter completed.")
-      end
-   else
-      if EnableDebugPrintsDetails and EnableDebugPrints then print("RenderScene: Target for counter text is nil.") end
-   end
+   font_manager.DrawText(UseRenderer and AppRenderer or AppWindowSurface, "Counter: " .. tostring(GlobalCounter), 10, 10, -- Renamed counter
+      { r = 255, g = 255, b = 255, a = 255 })                                                                             -- White text
 end
 
 SDL_Init(SDL_INIT_VIDEO)
