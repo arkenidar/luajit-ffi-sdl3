@@ -5,7 +5,6 @@
 
 Copyright (c) 2025 Dario Cangialosi ( a.k.a. <https://Arkenidar.com/coder.php> and <https://github.com/arkenidar>)
 --]]
----@diagnostic disable: undefined-global
 
 -- Moved module requires and initial setup to the top for correct scoping
 local ffi = require 'ffi'
