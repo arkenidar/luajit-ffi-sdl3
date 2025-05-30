@@ -296,14 +296,21 @@ function InitializeApplication()                                                
    -- Define buttons (example)
    -- Note: graphics_utils.CreateButton now expects x, y, w, h as separate arguments, not a table for rect.
    -- It also expects color tables for normal, hover, and pressed states.
-   ApplicationButtons[1] = graphics_utils.CreateButton("Quit App", 400, 10, 100, 30, -- Renamed Buttons
+   local button1X = 400
+   local button1W = 100
+   ApplicationButtons[1] = graphics_utils.CreateButton("Quit App", button1X, 10, button1W, 30, -- Renamed Buttons
       function() IsRunning = false end,                                              -- Renamed Running
       { r = 100, g = 100, b = 100, a = 255 },                                        -- Normal color
       { r = 150, g = 150, b = 150, a = 255 },                                        -- Hover color
       { r = 200, g = 80, b = 80, a = 255 }                                           -- Pressed color
    )
+   ApplicationButtons[1].anchorToRight = true
+   ApplicationButtons[1].offsetFromWindowRightEdge = config.WindowWidth - (button1X + button1W)
 
-   ApplicationButtons[2] = graphics_utils.CreateButton("Test Cnt", 400, 50, 100, 30, -- Renamed Buttons
+
+   local button2X = 400
+   local button2W = 100
+   ApplicationButtons[2] = graphics_utils.CreateButton("Test Cnt", button2X, 50, button2W, 30, -- Renamed Buttons
       function()
          GlobalCounter = GlobalCounter + 1
          if EnableDebugPrints then print("GlobalCounter incremented to: " .. GlobalCounter) end -- DEBUG LINE
@@ -312,6 +319,8 @@ function InitializeApplication()                                                
       { r = 150, g = 150, b = 150, a = 255 },                                                   -- Hover color
       { r = 80, g = 200, b = 80, a = 255 }                                                      -- Pressed color
    )
+   ApplicationButtons[2].anchorToRight = true
+   ApplicationButtons[2].offsetFromWindowRightEdge = config.WindowWidth - (button2X + button2W)
 end
 
 SDL_Init(SDL_INIT_VIDEO) -- Ensure SDL_Init is called before InitializeApplication
@@ -360,13 +369,26 @@ while IsRunning do                                                              
             end
          end
       elseif SdlEvent.type == SDL_EVENT_WINDOW_RESIZED then -- Renamed Event
+         local new_window_width = SdlEvent.window.data1
+         local new_window_height = SdlEvent.window.data2 -- Though not used for current X anchoring
+
          if EnableDebugPrints then
             print("Window resized to: " ..
-               SdlEvent.window.data1 ..
-               "x" .. SdlEvent.window.data2 .. string.format(" (Window Event Type: %d)", tonumber(SdlEvent.window.type)))
-         end                                                    -- Log window event type
+               new_window_width ..
+               "x" .. new_window_height .. string.format(" (Window Event Type: %d)", tonumber(SdlEvent.window.type)))
+         end                                                                                                       -- Log window event type
+
+         -- Update positions of buttons anchored to the right
+         for _, btn in ipairs(ApplicationButtons) do
+            if btn.anchorToRight and btn.offsetFromWindowRightEdge then
+               btn.rect[1] = new_window_width - btn.rect[3] - btn.offsetFromWindowRightEdge
+               -- Ensure button doesn't go off-screen to the left if window becomes too small
+               if btn.rect[1] < 0 then btn.rect[1] = 0 end
+            end
+         end
+
          if not UseRenderer then
-            local new_surface = SDL_GetWindowSurface(AppWindow) -- Renamed Window
+            local new_surface = SDL_GetWindowSurface(AppWindow)                                                    -- Renamed Window
             if EnableDebugPrints then
                print(string.format(
                   "Resize Handler: SDL_GetWindowSurface called. New Surface Ptr: %s", tostring(new_surface)))
