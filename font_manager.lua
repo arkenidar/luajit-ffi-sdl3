@@ -2,7 +2,6 @@
 local ffi = require 'ffi'
 local config = require 'config' -- Assuming config.lua is in the same directory
 local SDL = require 'sdl3_ffi'  -- Added
-require('global')(SDL)          -- Initialize global SDL functions/constants
 
 local M = {}
 

@@ -9,7 +9,6 @@ Copyright (c) 2025 Dario Cangialosi ( a.k.a. <https://Arkenidar.com/coder.php> a
 -- Moved module requires and initial setup to the top for correct scoping
 local ffi = require 'ffi'
 local SDL = require 'sdl3_ffi' -- Store the original library under a new name
-require('global')(SDL)         -- Initialize global SDL functions/constants
 
 local config = require 'config'
 local font_manager = require 'font_manager'
@@ -23,9 +22,9 @@ local EnableDebugPrintsDetails = config.EnableDebugPrintsDetails -- Use detailed
 -- It uses SDL3 to create a window and draw images and rectangles
 -- It uses SDL3 renderer or surface blitting depending on the UseRenderer variable
 
-local GlobalCounter = 0 -- Initialize GlobalCounter (Renamed from counter)
+local GlobalCounter = 0                                                                                     -- Initialize GlobalCounter (Renamed from counter)
 
-function RenderScene()  -- Renamed from Render
+function RenderScene()                                                                                      -- Renamed from Render
    -- Draw images
    graphics_utils.DrawImage(ActiveImages['Lena'], { 0, 0, ActiveImages['Lena'].w, ActiveImages['Lena'].h }) -- Renamed Image
 

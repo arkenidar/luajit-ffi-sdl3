@@ -3,7 +3,6 @@ local ffi = require 'ffi'
 local SDL = require 'sdl3_ffi'              -- Added SDL require
 local config = require 'config'
 local font_manager = require 'font_manager' -- Required for drawing text on buttons
-require('global')(SDL)                      -- Initialize global SDL functions/constants
 
 local M = {}
 
